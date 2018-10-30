@@ -428,3 +428,23 @@ QUnit.test('can be ran "early" with fake timers GH#351', function(assert) {
 
   fakeClock.tick(5001);
 });
+
+QUnit.test('can be ran "early" with fake timers GH#351 (only fake Date)', function(assert) {
+  assert.expect(1);
+  let done = assert.async();
+
+  let bb = new Backburner(['one']);
+
+  fakeClock = lolex.install({
+    toFake: ['Date'],
+  });
+
+  let startTime = originalDateNow();
+  bb.later(function(name) {
+    let endTime = originalDateNow();
+    assert.ok(endTime - startTime < 100, 'did not wait for 5s to run timer');
+    done();
+  }, 5000);
+
+  fakeClock.tick(5001);
+});

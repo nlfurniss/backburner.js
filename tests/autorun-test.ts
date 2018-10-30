@@ -162,3 +162,26 @@ QUnit.test('autorun functions even when using fake timers', function(assert) {
   assert.ok(bb.currentInstance, 'The DeferredActionQueues object exists');
   assert.equal(step++, 1);
 });
+
+QUnit.test('autorun functions even when using fake timers (only fake Date)', function(assert) {
+  let done = assert.async();
+  let bb = new Backburner(['zomg']);
+  let step = 0;
+
+  assert.ok(!bb.currentInstance, 'The DeferredActionQueues object is lazily instaniated');
+  assert.equal(step++, 0);
+
+  fakeClock = lolex.install({
+    toFake: ['Date'],
+  });
+  bb.schedule('zomg', null, () => {
+    assert.equal(step++, 2);
+    SET_TIMEOUT(() => {
+      assert.ok(!bb.hasTimers(), 'The all timers are cleared');
+      done();
+    });
+  });
+
+  assert.ok(bb.currentInstance, 'The DeferredActionQueues object exists');
+  assert.equal(step++, 1);
+});
